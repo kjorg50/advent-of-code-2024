@@ -1,66 +1,85 @@
 // Advent of Code
-// Day XX
-// https://adventofcode.com/2024/day/x
-
-/*
-    TEMPLATE
- */
+// Day 02
+// https://adventofcode.com/2024/day/2
 
 import java.io.File
+
+fun isSafeReport(report: List<Int>): Boolean {
+    var increasing = true
+    var isSafe = true
+
+    report.forEachIndexed { index, value ->
+        if (index == 0) {
+            // do nothing
+        } else if (index == 1) {
+            val previous = report[index - 1]
+            if (value < previous) {
+                increasing = false
+            }
+            if (Math.abs(value - previous) > 3 || (value - previous) == 0) {
+                isSafe = false
+            }
+        } else {
+            val previous = report[index - 1]
+            if (increasing && value < previous) {
+                isSafe = false
+            }
+            if (!increasing && value > previous) {
+                isSafe = false
+            }
+            if (Math.abs(value - previous) > 3 || (value - previous) == 0) {
+                isSafe = false
+            }
+        }
+    }
+
+    return isSafe
+}
 
 fun part1(filename: String) {
     var totalSafeCount = 0
 
     File(filename).forEachLine {
-        val numbers = it.split(" ")
-        var previous = 0
-        var increasing = true
-        var isLineSafe = true
+        val numbers = it.split(" ").map { it.toInt() }
 
-        numbers.forEachIndexed { index, value ->
-            if (index == 0) {
-                previous = value.toInt()
-            } else if (index == 1) {
-                var current = value.toInt()
-                if (current < previous) { // check if increasing
-                    increasing = false
-                }
-                if (Math.abs(current - previous) > 3 || (current - previous) == 0) { // check difference bounds
-                    isLineSafe = false
-                }
-//                println("current: $current, previous: $previous, increasing: $increasing, isLineSafe: $isLineSafe")
-                previous = current
-            } else {
-                val current = value.toInt()
-                if (increasing && current < previous) { // check if not still increasing
-                    isLineSafe = false
-                }
-                if (!increasing && current > previous) { // check if not still decreasing
-                    isLineSafe = false
-                }
-                if (Math.abs(current - previous) > 3 || (current - previous) == 0) { // check difference bounds
-                    isLineSafe = false
-                }
-//                println("current: $current, previous: $previous, increasing: $increasing, isLineSafe: $isLineSafe")
-                previous = current
-            }
-
-            // if we made it to the end of the list, increment the totalSafeCount
-            if (index == numbers.size - 1 && isLineSafe) {
-                totalSafeCount++
-//                println("!!! incrementing totalSafeCount: $totalSafeCount")
-            }
+        if (isSafeReport(numbers)) {
+            totalSafeCount++
         }
     }
 
     println(totalSafeCount)
 }
 
+fun canBeMadeSafe(levels: List<Int>, skipIndex: Int): Boolean {
+    val modifiedLevels = levels.toMutableList()
+    modifiedLevels.removeAt(skipIndex)
+
+    if (modifiedLevels.size < 2) return true
+
+    val isIncreasing = modifiedLevels[0] < modifiedLevels[1]
+
+    for (i in 1 until modifiedLevels.size - 1) {
+        val diff = modifiedLevels[i + 1] - modifiedLevels[i]
+        if ((isIncreasing && diff < 1) || (!isIncreasing && diff > -1) || Math.abs(diff) > 3) {
+            return false
+        }
+    }
+
+    return true
+}
+
 fun part2(filename: String) {
+    var totalSafeCount = 0
 
     File(filename).forEachLine {
-        // access each line with `it` (type String)
+        val numbers = it.split(" ").map { it.toInt() }
+
+        if (isSafeReport(numbers)) {
+            totalSafeCount++
+        }
     }
+
+    println(totalSafeCount)
 
 }
 
